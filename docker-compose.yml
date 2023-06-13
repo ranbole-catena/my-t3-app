@@ -1,0 +1,59 @@
+version: "3.9"
+services:
+  # app:
+  #   platform: "linux/amd64"
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     args:
+  #       NEXT_PUBLIC_CLIENTVAR: "clientvar"
+  #   working_dir: /app
+  #   ports:
+  #     - "3000:3000"
+  #   image: ranbonextjs
+  #   environment:
+  #     #- DATABASE_URL=mysql://jh5lljkhn4zh2zpxvib9:pscale_pw_r1aSwLkXIqWd7k96ZvBHEa5JzKZDg5Jjj9lo4o21Cy8@aws.connect.psdb.cloud/ranbo-test?ssl={"rejectUnauthorized":true}
+  #     #- DATABASE_URL=mysql://jh5lljkhn4zh2zpxvib9:pscale_pw_r1aSwLkXIqWd7k96ZvBHEa5JzKZDg5Jjj9lo4o21Cy8@127.0.0.1
+  #     #- DATABASE_URL=mysql://admin:Ran1314Lyb@freedb.c3vpoczo0eck.us-west-1.rds.amazonaws.com
+  #     #- DATABASE_URL=mysql://mysql-t3-local
+
+  phpmyadmin-t3-local:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-t3-local
+    links:
+      - mysql-t3-local
+    environment:
+      UPLOAD_LIMIT: 1000M
+      PMA_ARBITRARY: 1
+    ports:
+      - 8888:80
+    networks:
+      - app-network
+
+  mysql-t3-local:
+    image: mysql
+    container_name: mysql-t3-local
+    restart: "no"
+    tty: true
+    ports:
+      - "13306:3306"
+    environment:
+      MYSQL_DATABASE: ${DOCKER_MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DOCKER_MYSQL_ROOT_PASSWORD}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./dbdata:/var/lib/mysql/
+      - ./my.cnf:/etc/mysql/my.cnf
+    networks:
+      - app-network
+    expose:
+      - "13306"
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
